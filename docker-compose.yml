@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  varta-mqtt-service:
+    build: .
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env
+    container_name: varta-mqtt-service
