@@ -1,1 +1,4 @@
 .env
+sample_data.json
+.venv
+__pycache__/
