@@ -16,9 +16,8 @@ This Python service fetches battery data from an API and publishes it to an MQTT
 
 ### Pre-built Docker Image
 A Docker image is automatically built and pushed to GitHub Container Registry on releases.
-- Pull: `docker pull ghcr.io/your-username/homeassistant-varta:latest`
-- Replace `your-username` with your GitHub username.
-- Use in docker-compose by changing `build: .` to `image: ghcr.io/your-username/homeassistant-varta:latest`
+- Pull: `docker pull ghcr.io/marscerbl/vartal_pulse_neo_to_mqtt:latest`
+- Use in docker-compose by changing `build: .` to `image: ghcr.io/marscerbl/vartal_pulse_neo_to_mqtt:latest`
 
 ## Configuration
 

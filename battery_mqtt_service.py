@@ -36,13 +36,13 @@ SENSORS = {
     'gridPower_W': {'name': 'Grid Power', 'unit': 'W', 'device_class': 'power'},
     'generatingPower_W': {'name': 'Generating Power', 'unit': 'W', 'device_class': 'power'},
     'activePowerAc_W': {'name': 'Active Power AC', 'unit': 'W', 'device_class': 'power'},
-    'energyCounterAcIn_Wh': {'name': 'Netzbezug Gesamt', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterAcOut_Wh': {'name': 'Netzeinspeisung Gesamt', 'unit': 'Wh', 'device_class': 'energy'},
+    'energyCounterAcIn_Wh': {'name': 'House Consumption Total', 'unit': 'Wh', 'device_class': 'energy'},
+    'energyCounterAcOut_Wh': {'name': 'House Feed Total', 'unit': 'Wh', 'device_class': 'energy'},
     'energyCounterBattIn_Wh': {'name': 'Battery In Energy', 'unit': 'Wh', 'device_class': 'energy'},
     'energyCounterBattOut_Wh': {'name': 'Battery Out Energy', 'unit': 'Wh', 'device_class': 'energy'},
     'energyCounterPvOut_Wh': {'name': 'PV Generation Total', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterHouseIn_Wh': {'name': 'House Consumption Total', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterHouseOut_Wh': {'name': 'House Feed Total', 'unit': 'Wh', 'device_class': 'energy'},
+    'energyCounterHouseIn_Wh': {'name': 'Netzbezug Gesamt', 'unit': 'Wh', 'device_class': 'energy'},
+    'energyCounterHouseOut_Wh': {'name': 'Netzeinspeisung Gesamt', 'unit': 'Wh', 'device_class': 'energy'},
 }
 
 def fetch_data():
