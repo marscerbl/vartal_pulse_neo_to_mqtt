@@ -37,20 +37,52 @@ last_error = None
 
 # Key fields to publish (from sample_data.json)
 SENSORS = {
-    'soc_pct': {'name': 'State of Charge', 'unit': '%', 'device_class': 'battery'},
-    'soh_pct': {'name': 'State of Health', 'unit': '%', 'device_class': None},
-    'temperature1_C': {'name': 'Temperature 1', 'unit': '°C', 'device_class': 'temperature'},
-    'power_W': {'name': 'Power', 'unit': 'W', 'device_class': 'power'},
-    'gridPower_W': {'name': 'Grid Power', 'unit': 'W', 'device_class': 'power'},
-    'generatingPower_W': {'name': 'Generating Power', 'unit': 'W', 'device_class': 'power'},
-    'activePowerAc_W': {'name': 'Active Power AC', 'unit': 'W', 'device_class': 'power'},
-    'energyCounterAcIn_Wh': {'name': 'House Consumption Total', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterAcOut_Wh': {'name': 'House Feed Total', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterBattIn_Wh': {'name': 'Battery In Energy', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterBattOut_Wh': {'name': 'Battery Out Energy', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterPvOut_Wh': {'name': 'PV Generation Total', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterHouseIn_Wh': {'name': 'Netzbezug Gesamt', 'unit': 'Wh', 'device_class': 'energy'},
-    'energyCounterHouseOut_Wh': {'name': 'Netzeinspeisung Gesamt', 'unit': 'Wh', 'device_class': 'energy'},
+    # Battery Status
+    'soc_pct': {'name': 'State of Charge', 'unit': '%', 'device_class': 'battery', 'path': 'pulse.procImg'},
+    'soh_pct': {'name': 'State of Health', 'unit': '%', 'device_class': None, 'path': 'pulse.procImg'},
+    'cycles': {'name': 'Battery Cycles', 'unit': 'cycles', 'device_class': None, 'path': 'pulse.procImg'},
+    'energyCapacity_Wh': {'name': 'Energy Capacity', 'unit': 'Wh', 'device_class': 'energy', 'path': 'pulse.procImg'},
+    
+    # Temperature
+    'temperature1_C': {'name': 'Temperature 1', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
+    'temperature2_C': {'name': 'Temperature 2', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
+    'temperatureMax_C': {'name': 'Temperature Max', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
+    'temperatureMin_C': {'name': 'Temperature Min', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
+    
+    # Power
+    'power_W': {'name': 'Battery Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
+    'gridPower_W': {'name': 'Grid Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
+    'generatingPower_W': {'name': 'Generating Power (PV)', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
+    'activePowerAc_W': {'name': 'Active Power AC', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
+    'maxChargePower_W': {'name': 'Max Charge Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
+    'maxDischargePower_W': {'name': 'Max Discharge Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
+    
+    # Grid Info
+    'gridVoltage_V': {'name': 'Grid Voltage', 'unit': 'V', 'device_class': 'voltage', 'path': 'pulse.procImg'},
+    'gridFrequency_Hz': {'name': 'Grid Frequency', 'unit': 'Hz', 'device_class': 'frequency', 'path': 'pulse.procImg'},
+    'gridApparentPower_W': {'name': 'Grid Apparent Power', 'unit': 'VA', 'device_class': 'apparent_power', 'path': 'pulse.procImg'},
+    'gridReactivePower_W': {'name': 'Grid Reactive Power', 'unit': 'var', 'device_class': 'reactive_power', 'path': 'pulse.procImg'},
+    
+    # Energy Counters (Ws -> Wh conversion)
+    'energyCounterAcIn_Wh': {'name': 'House Consumption Total', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
+    'energyCounterAcOut_Wh': {'name': 'House Feed Total', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
+    'energyCounterBattIn_Wh': {'name': 'Battery In Energy', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
+    'energyCounterBattOut_Wh': {'name': 'Battery Out Energy', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
+    'energyCounterPvOut_Wh': {'name': 'PV Generation Total', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
+    'energyCounterHouseIn_Wh': {'name': 'Netzbezug Gesamt', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
+    'energyCounterHouseOut_Wh': {'name': 'Netzeinspeisung Gesamt', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
+    
+    # System Counters
+    'countActiveMinutes_h': {'name': 'Active Hours', 'unit': 'h', 'device_class': None, 'path': 'counters'},
+    'countNrOfSysStarts': {'name': 'System Starts', 'unit': 'starts', 'device_class': None, 'path': 'counters'},
+    
+    # Battery Module Details (bmAct)
+    'batteryVoltage_V': {'name': 'Battery Voltage', 'unit': 'V', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
+    'batteryCurrent_A': {'name': 'Battery Current', 'unit': 'A', 'device_class': 'current', 'path': 'pulse.bmAct'},
+    'batteryTemp_C': {'name': 'Battery Temperature', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.bmAct'},
+    'avgCellVoltage_mV': {'name': 'Avg Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
+    'maxCellVoltage_mV': {'name': 'Max Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
+    'minCellVoltage_mV': {'name': 'Min Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
 }
 
 # Status sensors for monitoring
@@ -191,21 +223,48 @@ def publish_status(sensor_key, value):
     client.publish(topic, str(value), retain=True)
 
 def publish_data(data):
-    pulse = data.get('pulse', {}).get('procImg', {})
-    counters = pulse.get('counters', {})
+    pulse = data.get('pulse', {})
+    procImg = pulse.get('procImg', {})
+    counters = procImg.get('counters', {})
+    bmAct = pulse.get('bmAct', {})
     
     # Log wichtige Werte
-    soc = pulse.get('soc_pct', 0)
-    power = pulse.get('power_W', 0)
-    print(f"  → SOC: {soc}% | Power: {power}W")
+    soc = procImg.get('soc_pct', 0)
+    power = procImg.get('power_W', 0)
+    grid_power = procImg.get('gridPower_W', 0)
+    print(f"  → SOC: {soc}% | Battery: {power}W | Grid: {grid_power}W")
     
-    for sensor_key in SENSORS:
-        if sensor_key.endswith('_Wh'):
+    for sensor_key, config in SENSORS.items():
+        path = config.get('path', 'pulse.procImg')
+        
+        # Bestimme Datenquelle basierend auf Pfad
+        if path == 'counters':
+            source = counters
+        elif path == 'pulse.bmAct':
+            source = bmAct
+        else:  # pulse.procImg
+            source = procImg
+        
+        # Spezielle Umwandlungen
+        if sensor_key.endswith('_Wh') and path == 'counters':
             # Convert Ws to Wh
             ws_key = sensor_key.replace('_Wh', '_Ws')
-            value = counters.get(ws_key, 0) / 3600
+            value = source.get(ws_key, 0) / 3600
+        elif sensor_key == 'countActiveMinutes_h':
+            # Convert minutes to hours
+            value = source.get('countActiveMinutes_m', 0) / 60
+        elif sensor_key == 'batteryVoltage_V':
+            # Convert cV to V
+            value = source.get('batteryVoltage_cV', 0) / 100
+        elif sensor_key == 'batteryCurrent_A':
+            # Convert dA to A
+            value = source.get('batteryCurrent_dA', 0) / 10
+        elif sensor_key == 'batteryTemp_C':
+            # Convert dC to C
+            value = source.get('batteryTemp_dC', 0) / 10
         else:
-            value = pulse.get(sensor_key, 0)
+            value = source.get(sensor_key, 0)
+        
         topic = f"homeassistant/sensor/{DEVICE_NAME}/{sensor_key}/state"
         client.publish(topic, str(value))
     
