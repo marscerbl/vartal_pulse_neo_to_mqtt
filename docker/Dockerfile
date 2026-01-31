@@ -4,12 +4,15 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install dependencies
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files
-COPY battery_mqtt_service.py .
+# Copy source code
+COPY src/ ./src/
+
+# Set PYTHONPATH
+ENV PYTHONPATH=/app/src
 
 # Run the service
-CMD ["python", "battery_mqtt_service.py"]
+CMD ["python", "-m", "varta_mqtt.service"]

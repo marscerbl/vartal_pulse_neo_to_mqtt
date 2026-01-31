@@ -1,23 +1,67 @@
 # Varta Battery MQTT Service
 
-This Python service fetches battery data from an API and publishes it to an MQTT broker for Home Assistant autodiscovery.
+This Python service fetches battery data from a Varta battery system API and publishes it to an MQTT broker for Home Assistant autodiscovery.
 
-## Setup
+## Features
 
-### Local Run
-1. Install dependencies: `pip install -r requirements.txt`
-2. Configure `.env` with your API and MQTT details.
-3. Run the service: `python battery_mqtt_service.py`
+✅ **Session Management**: Reuses login sessions to prevent API overload  
+✅ **Auto Re-login**: Automatically handles expired sessions  
+✅ **Login Cooldown**: 60-second cooldown prevents rapid login attempts  
+✅ **Error Handling**: Exponential backoff on errors (max 60s)  
+✅ **Status Monitoring**: MQTT status sensors for service health  
+✅ **Home Assistant Integration**: Auto-discovery for all sensors  
 
-### Docker Run
-1. Build and run with Docker Compose: `docker-compose up -d`
-2. Edit `.env` as needed (mounted as volume, no rebuild required).
-3. Stop: `docker-compose down`
+## Quick Start
 
-### Pre-built Docker Image
-A Docker image is automatically built and pushed to GitHub Container Registry on releases.
-- Pull: `docker pull ghcr.io/marscerbl/vartal_pulse_neo_to_mqtt:latest`
-- Use in docker-compose by changing `build: .` to `image: ghcr.io/marscerbl/vartal_pulse_neo_to_mqtt:latest`
+### Using Docker (Recommended)
+
+```bash
+# Clone repository
+git clone <your-repo>
+cd homeassistant_varta
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# Start service
+cd docker
+docker-compose up -d
+```
+
+### Local Installation
+
+```bash
+# Install package
+pip install -e .
+
+# Configure
+cp .env.example .env
+# Edit .env
+
+# Run service
+varta-mqtt
+```
+
+For detailed installation and configuration instructions, see [docs/INSTALLATION.md](docs/INSTALLATION.md).
+
+## Project Structure
+
+```
+homeassistant_varta/
+├── src/varta_mqtt/       # Main source code
+│   ├── __init__.py
+│   └── service.py        # Core service logic
+├── tests/                # Test suite
+│   └── test_service.py
+├── docker/               # Docker configuration
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── docs/                 # Documentation
+├── .env.example          # Example configuration
+├── pyproject.toml        # Package configuration
+└── requirements.txt      # Dependencies
+```
 
 ## Configuration
 

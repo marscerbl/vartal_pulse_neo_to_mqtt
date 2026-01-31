@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  varta-mqtt-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ../.env:/app/.env:ro
+    container_name: varta-mqtt-service
+    environment:
+      - PYTHONUNBUFFERED=1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
