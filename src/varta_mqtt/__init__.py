@@ -7,6 +7,3 @@ __description__ = "MQTT service for Varta battery integration with Home Assistan
 from .service import main
 
 __all__ = ['main']
-
-if __name__ == "__main__":
-    main()
