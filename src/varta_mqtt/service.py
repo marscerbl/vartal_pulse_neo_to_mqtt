@@ -133,9 +133,11 @@ def fetch_data():
                 return None
         
         response.raise_for_status()
+        data = response.json()
+        print(f"✓ Data fetched successfully at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         publish_status('service_status', 'online')
         publish_status('last_update', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        return response.json()
+        return data
         
     except requests.RequestException as e:
         error_msg = f"API fetch error: {str(e)}"
@@ -191,6 +193,12 @@ def publish_status(sensor_key, value):
 def publish_data(data):
     pulse = data.get('pulse', {}).get('procImg', {})
     counters = pulse.get('counters', {})
+    
+    # Log wichtige Werte
+    soc = pulse.get('soc_pct', 0)
+    power = pulse.get('power_W', 0)
+    print(f"  → SOC: {soc}% | Power: {power}W")
+    
     for sensor_key in SENSORS:
         if sensor_key.endswith('_Wh'):
             # Convert Ws to Wh
@@ -200,11 +208,22 @@ def publish_data(data):
             value = pulse.get(sensor_key, 0)
         topic = f"homeassistant/sensor/{DEVICE_NAME}/{sensor_key}/state"
         client.publish(topic, str(value))
+    
+    print(f"  → Published {len(SENSORS)} sensors to MQTT")
 
 def main():
+    print("="*60)
+    print(f"Varta MQTT Service started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"API: {API_URL}")
+    print(f"MQTT Broker: {MQTT_BROKER}:{MQTT_PORT}")
+    print(f"Update Interval: {INTERVAL_SECONDS}s")
+    print("="*60)
+    
     publish_discovery()  # Publish discovery once on start
     publish_status('service_status', 'starting')
     publish_status('error_count', '0')
+    print(f"Published discovery for {len(SENSORS)} sensors + {len(STATUS_SENSORS)} status sensors")
+    print(f"Starting data collection loop...\n")
     
     while True:
         data = fetch_data()
@@ -213,7 +232,7 @@ def main():
         else:
             # Exponential backoff on errors (max 60 seconds)
             wait_time = min(INTERVAL_SECONDS * (2 ** min(error_count, 5)), 60)
-            print(f"Waiting {wait_time}s before retry...")
+            print(f"⚠ Error occurred. Waiting {wait_time}s before retry... (Error #{error_count})")
             time.sleep(wait_time)
             continue
         

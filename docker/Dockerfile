@@ -15,4 +15,4 @@ COPY src/ ./src/
 ENV PYTHONPATH=/app/src
 
 # Run the service
-CMD ["python", "-m", "varta_mqtt.service"]
+CMD ["python", "-m", "varta_mqtt"]

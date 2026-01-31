@@ -1,8 +1,6 @@
 services:
   varta-mqtt-service:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: ghcr.io/marscerbl/vartal_pulse_neo_to_mqtt:latest
     network_mode: host
     restart: unless-stopped
     volumes:
