@@ -24,7 +24,7 @@ if not API_URL or not MQTT_BROKER:
     raise ValueError("API_URL and MQTT_BROKER must be set in .env")
 
 # MQTT client setup
-client = mqtt_client.Client()
+client = mqtt_client.Client(callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2)
 client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 client.connect(MQTT_BROKER, MQTT_PORT)
 

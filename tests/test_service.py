@@ -159,25 +159,27 @@ class TestFetchData:
         """Test that fetch_data creates new session if none exists"""
         # Setup
         service.session = None
-        mock_login.return_value = True
         
         mock_session = Mock()
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = sample_api_response
+        mock_session.get.return_value = mock_response
         
-        with patch('varta_mqtt.service.requests.Session') as mock_session_class:
-            mock_session_class.return_value = mock_session
+        # Mock perform_login to set session
+        def set_session():
             service.session = mock_session
-            mock_session.get.return_value = mock_response
-            
-            # Execute
-            result = service.fetch_data()
-            
-            # Assert
-            assert result is not None
-            mock_login.assert_called_once()
-            mock_publish.assert_any_call('service_status', 'online')
+            return True
+        
+        mock_login.side_effect = set_session
+        
+        # Execute
+        result = service.fetch_data()
+        
+        # Assert
+        assert result is not None
+        mock_login.assert_called_once()
+        mock_publish.assert_any_call('service_status', 'online')
     
     @patch('varta_mqtt.service.perform_login')
     @patch('varta_mqtt.service.publish_status')
@@ -332,9 +334,13 @@ class TestErrorHandling:
         wait_time_2 = min(service.INTERVAL_SECONDS * (2 ** min(service.error_count, 5)), 60)
         assert wait_time_2 == 4
         
-        service.error_count = 10  # Should cap at 60 seconds
+        service.error_count = 5
+        wait_time_5 = min(service.INTERVAL_SECONDS * (2 ** min(service.error_count, 5)), 60)
+        assert wait_time_5 == 32  # 1 * 2^5 = 32
+        
+        service.error_count = 10  # Should be capped at max 2^5 = 32, but still limited by min(_, 60)
         wait_time_10 = min(service.INTERVAL_SECONDS * (2 ** min(service.error_count, 5)), 60)
-        assert wait_time_10 == 60
+        assert wait_time_10 == 32  # min(5, 5) = 5, so 1 * 2^5 = 32
 
 
 if __name__ == "__main__":
