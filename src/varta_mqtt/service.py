@@ -35,54 +35,101 @@ LOGIN_COOLDOWN = 60  # Minimum seconds between login attempts
 error_count = 0
 last_error = None
 
-# Key fields to publish (from sample_data.json)
+# Key fields to publish (clean names; no backward-compatibility required)
 SENSORS = {
     # Battery Status
-    'soc_pct': {'name': 'State of Charge', 'unit': '%', 'device_class': 'battery', 'path': 'pulse.procImg'},
-    'soh_pct': {'name': 'State of Health', 'unit': '%', 'device_class': None, 'path': 'pulse.procImg'},
-    'cycles': {'name': 'Battery Cycles', 'unit': 'cycles', 'device_class': None, 'path': 'pulse.procImg'},
-    'energyCapacity_Wh': {'name': 'Energy Capacity', 'unit': 'Wh', 'device_class': 'energy', 'path': 'pulse.procImg'},
-    
+    'state_of_charge_pct': {'name': 'State of Charge', 'unit': '%', 'device_class': 'battery', 'path': 'pulse.procImg', 'source_key': 'soc_pct'},
+    'state_of_health_pct': {'name': 'State of Health', 'unit': '%', 'device_class': None, 'path': 'pulse.procImg', 'source_key': 'soh_pct'},
+    'battery_cycles': {'name': 'Battery Cycles', 'unit': 'cycles', 'device_class': None, 'path': 'pulse.procImg', 'source_key': 'cycles'},
+    'energy_capacity_wh': {'name': 'Energy Capacity', 'unit': 'Wh', 'device_class': 'energy', 'path': 'pulse.procImg', 'source_key': 'energyCapacity_Wh'},
+
     # Temperature
-    'temperature1_C': {'name': 'Temperature 1', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
-    'temperature2_C': {'name': 'Temperature 2', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
-    'temperatureMax_C': {'name': 'Temperature Max', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
-    'temperatureMin_C': {'name': 'Temperature Min', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg'},
-    
+    'temperature_1_c': {'name': 'Temperature 1', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.procImg', 'source_key': 'temperature1_C'},
+
     # Power
-    'power_W': {'name': 'Battery Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
-    'gridPower_W': {'name': 'Grid Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
-    'generatingPower_W': {'name': 'Generating Power (PV)', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
-    'activePowerAc_W': {'name': 'Active Power AC', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
-    'maxChargePower_W': {'name': 'Max Charge Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
-    'maxDischargePower_W': {'name': 'Max Discharge Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg'},
-    
+    'battery_power_w': {'name': 'Battery Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'power_W'},
+    'grid_power_total_w': {'name': 'Grid Power Total', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'gridPower_W'},
+    'varta_ac_port_power_w': {'name': 'Varta AC Port Active Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'activePowerAc_W'},
+    'grid_power_l1_w': {'name': 'Grid Power L1', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'gridAppPowerL1_W'},
+    'grid_power_l2_w': {'name': 'Grid Power L2', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'gridAppPowerL2_W'},
+    'grid_power_l3_w': {'name': 'Grid Power L3', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'gridAppPowerL3_W'},
+    'max_charge_power_w': {'name': 'Max Charge Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'maxChargePower_W'},
+    'max_discharge_power_w': {'name': 'Max Discharge Power', 'unit': 'W', 'device_class': 'power', 'path': 'pulse.procImg', 'source_key': 'maxDischargePower_W'},
+
     # Grid Info
-    'gridVoltage_V': {'name': 'Grid Voltage', 'unit': 'V', 'device_class': 'voltage', 'path': 'pulse.procImg'},
-    'gridFrequency_Hz': {'name': 'Grid Frequency', 'unit': 'Hz', 'device_class': 'frequency', 'path': 'pulse.procImg'},
-    'gridApparentPower_W': {'name': 'Grid Apparent Power', 'unit': 'VA', 'device_class': 'apparent_power', 'path': 'pulse.procImg'},
-    'gridReactivePower_W': {'name': 'Grid Reactive Power', 'unit': 'var', 'device_class': 'reactive_power', 'path': 'pulse.procImg'},
-    
-    # Energy Counters (Ws -> Wh conversion)
-    'energyCounterAcIn_Wh': {'name': 'House Consumption Total', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
-    'energyCounterAcOut_Wh': {'name': 'House Feed Total', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
-    'energyCounterBattIn_Wh': {'name': 'Battery In Energy', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
-    'energyCounterBattOut_Wh': {'name': 'Battery Out Energy', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
-    'energyCounterPvOut_Wh': {'name': 'PV Generation Total', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
-    'energyCounterHouseIn_Wh': {'name': 'Netzbezug Gesamt', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
-    'energyCounterHouseOut_Wh': {'name': 'Netzeinspeisung Gesamt', 'unit': 'Wh', 'device_class': 'energy', 'path': 'counters'},
-    
+    'grid_voltage_v': {'name': 'Grid Voltage', 'unit': 'V', 'device_class': 'voltage', 'path': 'pulse.procImg', 'source_key': 'gridVoltage_V'},
+    'grid_frequency_hz': {'name': 'Grid Frequency', 'unit': 'Hz', 'device_class': 'frequency', 'path': 'pulse.procImg', 'source_key': 'gridFrequency_Hz'},
+    'grid_apparent_power_va': {'name': 'Grid Apparent Power', 'unit': 'VA', 'device_class': 'apparent_power', 'path': 'pulse.procImg', 'source_key': 'gridApparentPower_W'},
+    'grid_reactive_power_var': {'name': 'Grid Reactive Power', 'unit': 'var', 'device_class': 'reactive_power', 'path': 'pulse.procImg', 'source_key': 'gridReactivePower_W'},
+
+    # Energy Counters
+    'grid_to_battery_charged_total_wh': {
+        'name': 'Grid to Battery Charged (AC side) Total',
+        'unit': 'Wh',
+        'device_class': 'energy',
+        'path': 'counters',
+        'source_key': 'energyCounterAcIn_Ws',
+        'conversion': 'ws_to_wh'
+    },
+    'battery_to_ac_discharged_total_wh': {
+        'name': 'Battery to AC Discharged (AC side) Total',
+        'unit': 'Wh',
+        'device_class': 'energy',
+        'path': 'counters',
+        'source_key': 'energyCounterAcOut_Ws',
+        'conversion': 'ws_to_wh'
+    },
+    'battery_charged_total_wh': {
+        'name': 'Battery Charged (DC side) Total',
+        'unit': 'Wh',
+        'device_class': 'energy',
+        'path': 'counters',
+        'source_key': 'energyCounterBattIn_Ws',
+        'conversion': 'ws_to_wh'
+    },
+    'battery_discharged_total_wh': {
+        'name': 'Battery Discharged (DC side) Total',
+        'unit': 'Wh',
+        'device_class': 'energy',
+        'path': 'counters',
+        'source_key': 'energyCounterBattOut_Ws',
+        'conversion': 'ws_to_wh'
+    },
+    'grid_import_total_wh': {
+        'name': 'Grid Import (House Meter) Total',
+        'unit': 'Wh',
+        'device_class': 'energy',
+        'path': 'counters',
+        'source_key': 'energyCounterHouseIn_Ws',
+        'conversion': 'ws_to_wh'
+    },
+    'grid_export_total_wh': {
+        'name': 'Grid Export (House Meter) Total',
+        'unit': 'Wh',
+        'device_class': 'energy',
+        'path': 'counters',
+        'source_key': 'energyCounterHouseOut_Ws',
+        'conversion': 'ws_to_wh'
+    },
+
     # System Counters
-    'countActiveMinutes_h': {'name': 'Active Hours', 'unit': 'h', 'device_class': None, 'path': 'counters'},
-    'countNrOfSysStarts': {'name': 'System Starts', 'unit': 'starts', 'device_class': None, 'path': 'counters'},
-    
+    'active_hours': {
+        'name': 'Active Hours',
+        'unit': 'h',
+        'device_class': None,
+        'path': 'counters',
+        'source_key': 'countActiveMinutes_m',
+        'conversion': 'minutes_to_hours'
+    },
+    'system_starts': {'name': 'System Starts', 'unit': 'starts', 'device_class': None, 'path': 'counters', 'source_key': 'countNrOfSysStarts'},
+
     # Battery Module Details (bmAct)
-    'batteryVoltage_V': {'name': 'Battery Voltage', 'unit': 'V', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
-    'batteryCurrent_A': {'name': 'Battery Current', 'unit': 'A', 'device_class': 'current', 'path': 'pulse.bmAct'},
-    'batteryTemp_C': {'name': 'Battery Temperature', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.bmAct'},
-    'avgCellVoltage_mV': {'name': 'Avg Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
-    'maxCellVoltage_mV': {'name': 'Max Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
-    'minCellVoltage_mV': {'name': 'Min Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct'},
+    'battery_voltage_v': {'name': 'Battery Voltage', 'unit': 'V', 'device_class': 'voltage', 'path': 'pulse.bmAct', 'source_key': 'batteryVoltage_cV', 'conversion': 'centivolt_to_volt'},
+    'battery_current_a': {'name': 'Battery Current', 'unit': 'A', 'device_class': 'current', 'path': 'pulse.bmAct', 'source_key': 'batteryCurrent_dA', 'conversion': 'deciamp_to_amp'},
+    'battery_temp_c': {'name': 'Battery Temperature', 'unit': '°C', 'device_class': 'temperature', 'path': 'pulse.bmAct', 'source_key': 'batteryTemp_dC', 'conversion': 'decideg_to_deg'},
+    'avg_cell_voltage_mv': {'name': 'Avg Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct', 'source_key': 'avgCellVoltage_mV'},
+    'max_cell_voltage_mv': {'name': 'Max Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct', 'source_key': 'maxCellVoltage_mV'},
+    'min_cell_voltage_mv': {'name': 'Min Cell Voltage', 'unit': 'mV', 'device_class': 'voltage', 'path': 'pulse.bmAct', 'source_key': 'minCellVoltage_mV'},
 }
 
 # Status sensors for monitoring
@@ -236,6 +283,8 @@ def publish_data(data):
     
     for sensor_key, config in SENSORS.items():
         path = config.get('path', 'pulse.procImg')
+        source_key = config.get('source_key', sensor_key)
+        conversion = config.get('conversion')
         
         # Bestimme Datenquelle basierend auf Pfad
         if path == 'counters':
@@ -245,25 +294,20 @@ def publish_data(data):
         else:  # pulse.procImg
             source = procImg
         
-        # Spezielle Umwandlungen
-        if sensor_key.endswith('_Wh') and path == 'counters':
-            # Convert Ws to Wh
-            ws_key = sensor_key.replace('_Wh', '_Ws')
-            value = source.get(ws_key, 0) / 3600
-        elif sensor_key == 'countActiveMinutes_h':
-            # Convert minutes to hours
-            value = source.get('countActiveMinutes_m', 0) / 60
-        elif sensor_key == 'batteryVoltage_V':
-            # Convert cV to V
-            value = source.get('batteryVoltage_cV', 0) / 100
-        elif sensor_key == 'batteryCurrent_A':
-            # Convert dA to A
-            value = source.get('batteryCurrent_dA', 0) / 10
-        elif sensor_key == 'batteryTemp_C':
-            # Convert dC to C
-            value = source.get('batteryTemp_dC', 0) / 10
+        raw_value = source.get(source_key, 0)
+
+        if conversion == 'ws_to_wh':
+            value = raw_value / 3600
+        elif conversion == 'minutes_to_hours':
+            value = raw_value / 60
+        elif conversion == 'centivolt_to_volt':
+            value = raw_value / 100
+        elif conversion == 'deciamp_to_amp':
+            value = raw_value / 10
+        elif conversion == 'decideg_to_deg':
+            value = raw_value / 10
         else:
-            value = source.get(sensor_key, 0)
+            value = raw_value
         
         topic = f"homeassistant/sensor/{DEVICE_NAME}/{sensor_key}/state"
         client.publish(topic, str(value))
