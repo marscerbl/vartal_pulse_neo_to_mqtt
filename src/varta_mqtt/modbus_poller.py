@@ -57,11 +57,7 @@ class ModbusPoller:
             raise ConnectionError("Modbus connection failed")
 
         assert self.client is not None
-        try:
-            response = self.client.read_holding_registers(address=address, count=1, slave=self.unit_id)
-        except TypeError:
-            # Older pymodbus versions use "unit" instead of "slave".
-            response = self.client.read_holding_registers(address=address, count=1, unit=self.unit_id)
+        response = self.client.read_holding_registers(address=address, count=1, device_id=self.unit_id)
         if response.isError():
             raise RuntimeError(f"Modbus read error at address {address}: {response}")
 
