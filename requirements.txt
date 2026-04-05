@@ -1,6 +1,7 @@
 paho-mqtt
 requests
 python-dotenv
+pymodbus>=3.6.0
 pytest
 pytest-mock
 responses

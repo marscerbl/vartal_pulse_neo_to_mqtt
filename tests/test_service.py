@@ -25,6 +25,9 @@ def mock_env(monkeypatch):
     monkeypatch.setenv('MQTT_PASSWORD', 'mqtt_pass')
     monkeypatch.setenv('DEVICE_NAME', 'test_battery')
     monkeypatch.setenv('INTERVAL_SECONDS', '1')
+    monkeypatch.setenv('MODBUS_HOST', '')
+    monkeypatch.setenv('MODBUS_POLLING_INTERVAL_SECONDS', '1')
+    monkeypatch.setenv('MODBUS_PUBLISH_INTERVAL_SECONDS', '10')
 
 
 @pytest.fixture
@@ -61,6 +64,11 @@ def reset_globals():
     service.last_login_time = 0
     service.error_count = 0
     service.last_error = None
+    service.latest_api_data = None
+    service.modbus_error_count = 0
+    service.last_modbus_error = ''
+    service.fallback_active = False
+    service.MODBUS_ENABLED = False
     yield
 
 
@@ -239,13 +247,12 @@ class TestPublishData:
         calls = mock_client.publish.call_args_list
         topics = [call[0][0] for call in calls]
         
-        assert any('soc_pct' in topic for topic in topics)
-        assert any('power_W' in topic for topic in topics)
+        assert any('state_of_charge_pct' in topic for topic in topics)
+        assert any('battery_power_w' in topic for topic in topics)
         
         # Verify energy conversion from Ws to Wh
         for call in calls:
-            if 'energyCounterAcIn_Wh' in call[0][0]:
-                # 1000000 Ws / 3600 = 277.78 Wh (approximately)
+            if 'grid_to_battery_charged_total_wh' in call[0][0]:
                 value = float(call[0][1])
                 assert 277 < value < 278
     
@@ -341,6 +348,38 @@ class TestErrorHandling:
         service.error_count = 10  # Should be capped at max 2^5 = 32, but still limited by min(_, 60)
         wait_time_10 = min(service.INTERVAL_SECONDS * (2 ** min(service.error_count, 5)), 60)
         assert wait_time_10 == 32  # min(5, 5) = 5, so 1 * 2^5 = 32
+
+
+class TestModbusFallbackBehavior:
+    """Test Modbus averaging and API fallback helpers."""
+
+    @patch('varta_mqtt.service.client')
+    def test_publish_averaged_modbus_values(self, mock_client):
+        samples = {
+            'varta_ac_port_power_w': [100, 200, 300],
+            'grid_power_total_w': [-100, -200, -300],
+        }
+
+        published = service._publish_averaged_modbus_values(samples)
+
+        assert published is True
+        calls = mock_client.publish.call_args_list
+        published_topics = [call[0][0] for call in calls]
+        published_values = {call[0][0]: float(call[0][1]) for call in calls}
+
+        ac_topic = f"homeassistant/sensor/{service.DEVICE_NAME}/varta_ac_port_power_w/state"
+        grid_topic = f"homeassistant/sensor/{service.DEVICE_NAME}/grid_power_total_w/state"
+        assert ac_topic in published_topics
+        assert grid_topic in published_topics
+        assert published_values[ac_topic] == 200.0
+        assert published_values[grid_topic] == -200.0
+
+    def test_get_api_fallback_values(self, sample_api_response):
+        service.latest_api_data = sample_api_response
+        values = service._get_api_fallback_values()
+
+        assert values['varta_ac_port_power_w'] == 150
+        assert values['grid_power_total_w'] == -200
 
 
 if __name__ == "__main__":
